@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as csstree from 'css-tree';
+import { loadConfig, createMetadata, GeneratorConfig } from './config';
 
 interface UtilityClass {
   className: string;
@@ -16,17 +17,20 @@ interface CategorizedUtilities {
 /**
  * Builds Tailwind CSS and returns the output CSS content
  */
-function buildTailwindCSS(): string {
+function buildTailwindCSS(config: GeneratorConfig): string {
   console.log('Building Tailwind CSS...');
 
   try {
     // Use Tailwind CLI to build CSS
     const outputPath = path.join(__dirname, '..', 'output.css');
-    const inputPath = path.join(__dirname, '..', 'input.css');
-    const configPath = path.join(__dirname, '..', 'tailwind.config.js');
+    const inputPath = path.join(__dirname, '..', config.tailwind.inputCss);
+    const configPath = path.join(__dirname, '..', config.tailwind.configFile);
 
-    const command = `npx @tailwindcss/cli@4 -i "${inputPath}" -o "${outputPath}" -c "${configPath}" --minify`;
+    // Use major version for CLI (e.g., "4.1.18" -> "4")
+    const majorVersion = config.tailwind.version.split('.')[0];
+    const command = `npx @tailwindcss/cli@${majorVersion} -i "${inputPath}" -o "${outputPath}" -c "${configPath}" --minify`;
 
+    console.log(`Using Tailwind CSS v${config.tailwind.version}`);
     console.log(`Running: ${command}`);
     execSync(command, { stdio: 'inherit' });
 
@@ -586,8 +590,11 @@ function categorizeUtilities(utilities: Set<string>): CategorizedUtilities {
 function main() {
   console.log('=== Tailwind CSS Utility Extractor ===\n');
 
+  // Load configuration
+  const config = loadConfig();
+
   // Build Tailwind CSS
-  const cssContent = buildTailwindCSS();
+  const cssContent = buildTailwindCSS(config);
 
   // Extract utility classes
   const utilities = extractUtilityClasses(cssContent);
@@ -595,15 +602,24 @@ function main() {
   // Categorize utilities
   const categorized = categorizeUtilities(utilities);
 
-  // Write output
+  // Create metadata
+  const metadata = createMetadata(config.tailwind.version, utilities.size);
+
+  // Write output with metadata
   const outputPath = path.join(__dirname, '..', 'categorized-utilities.json');
-  fs.writeFileSync(outputPath, JSON.stringify(categorized, null, 2));
+  const output = {
+    metadata,
+    utilities: categorized
+  };
+  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
   console.log(`\nWrote categorized utilities to: ${outputPath}`);
 
   // Print statistics
   console.log('\n=== Statistics ===');
+  console.log(`Tailwind version: ${metadata.tailwindVersion}`);
   console.log(`Total utilities: ${utilities.size}`);
   console.log(`Categories: ${Object.keys(categorized).length}`);
+  console.log(`Generated: ${metadata.generatedDate}`);
   console.log('\nUtilities per category:');
   Object.entries(categorized)
     .sort(([, a], [, b]) => b.length - a.length)
