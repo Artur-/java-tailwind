@@ -23,7 +23,6 @@ export interface GeneratorConfig {
   java: {
     package: string;
     className: string;
-    sinceVersion: string;
   };
   output: {
     directory: string;
@@ -53,8 +52,7 @@ function getDefaultConfig(): GeneratorConfig {
     },
     java: {
       package: 'com.vaadin.flow.component.tailwind',
-      className: 'TW',
-      sinceVersion: '25.1'
+      className: 'TW'
     },
     output: {
       directory: '../../output',
@@ -112,10 +110,6 @@ function parseCliArgs() {
       type: 'string',
       description: 'Tailwind CSS version (or "auto")'
     })
-    .option('since', {
-      type: 'string',
-      description: 'Vaadin/Flow version for @since tag'
-    })
     .option('output', {
       type: 'string',
       description: 'Output directory path'
@@ -154,10 +148,6 @@ export function loadConfig(): GeneratorConfig {
   if (args.version) {
     console.log(`  Overriding version: ${args.version}`);
     config.tailwind.version = args.version as string;
-  }
-  if (args.since) {
-    console.log(`  Overriding since: ${args.since}`);
-    config.java.sinceVersion = args.since as string;
   }
   if (args.output) {
     console.log(`  Overriding output: ${args.output}`);

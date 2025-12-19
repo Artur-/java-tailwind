@@ -22,7 +22,6 @@ import java.io.Serializable;
  * }</pre>
  *
  * @see <a href="https://tailwindcss.com/docs">Tailwind CSS Documentation</a>
- * @since 25.1
  */
 public final class TW implements Serializable {
 

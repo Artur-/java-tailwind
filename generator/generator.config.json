@@ -7,8 +7,7 @@
   },
   "java": {
     "package": "com.vaadin.flow.component.tailwind",
-    "className": "TW",
-    "sinceVersion": "25.1"
+    "className": "TW"
   },
   "output": {
     "directory": "../output",

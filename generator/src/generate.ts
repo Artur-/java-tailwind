@@ -126,7 +126,6 @@ function generateTWClass(categorized: CategorizedUtilities, config: GeneratorCon
   lines.push(' * }</pre>');
   lines.push(' *');
   lines.push(' * @see <a href="https://tailwindcss.com/docs">Tailwind CSS Documentation</a>');
-  lines.push(` * @since ${config.java.sinceVersion}`);
   lines.push(' */');
   lines.push(`public final class ${config.java.className} implements Serializable {`);
   lines.push('');
