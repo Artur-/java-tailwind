@@ -114,8 +114,6 @@ function generateTWClass(categorized: CategorizedUtilities, config: GeneratorCon
   lines.push(' * );');
   lines.push(' * }</pre>');
   lines.push(' *');
-  lines.push(` * <p>Generated on: ${metadata.generatedDate}</p>`);
-  lines.push(' *');
   lines.push(' * @see <a href="https://tailwindcss.com/docs">Tailwind CSS Documentation</a>');
   lines.push(` * @since ${config.java.sinceVersion}`);
   lines.push(' */');
@@ -125,9 +123,6 @@ function generateTWClass(categorized: CategorizedUtilities, config: GeneratorCon
   // Version constants
   lines.push('    /** Tailwind CSS version these constants were generated from */');
   lines.push(`    public static final String TAILWIND_VERSION = "${metadata.tailwindVersion}";`);
-  lines.push('');
-  lines.push('    /** Date these constants were generated */');
-  lines.push(`    public static final String GENERATED_DATE = "${metadata.generatedDate}";`);
   lines.push('');
 
   // Check if grouping is enabled
@@ -464,7 +459,6 @@ function main() {
     const totalUtilities = Object.values(categorized).reduce((sum, arr) => sum + arr.length, 0);
     metadata = {
       tailwindVersion: config.tailwind.version,
-      generatedDate: new Date().toISOString(),
       totalUtilities
     };
   }

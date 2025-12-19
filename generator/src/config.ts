@@ -37,7 +37,6 @@ export interface GeneratorConfig {
 
 export interface Metadata {
   tailwindVersion: string;
-  generatedDate: string;
   totalUtilities: number;
 }
 
@@ -184,7 +183,6 @@ export function loadConfig(): GeneratorConfig {
 export function createMetadata(tailwindVersion: string, totalUtilities: number): Metadata {
   return {
     tailwindVersion,
-    generatedDate: new Date().toISOString(),
     totalUtilities
   };
 }

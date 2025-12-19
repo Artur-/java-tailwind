@@ -620,7 +620,6 @@ function main() {
   console.log(`Tailwind version: ${metadata.tailwindVersion}`);
   console.log(`Total utilities: ${utilities.size}`);
   console.log(`Categories: ${Object.keys(categorized).length}`);
-  console.log(`Generated: ${metadata.generatedDate}`);
   console.log('\nUtilities per category:');
   Object.entries(categorized)
     .sort(([, a], [, b]) => b.length - a.length)
