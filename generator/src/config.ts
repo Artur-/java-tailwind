@@ -3,6 +3,16 @@ import * as path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
+export interface GroupingConfig {
+  enabled: boolean;
+  structure: {
+    [topLevelCategory: string]: {
+      subcategories?: string[];
+      categories: string[];
+    };
+  };
+}
+
 export interface GeneratorConfig {
   tailwind: {
     version: string;
@@ -22,6 +32,7 @@ export interface GeneratorConfig {
   breakpoints: {
     [key: string]: string;
   };
+  grouping?: GroupingConfig;
 }
 
 export interface Metadata {

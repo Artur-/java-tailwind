@@ -11,7 +11,7 @@
     "sinceVersion": "25.1"
   },
   "output": {
-    "directory": "../../output",
+    "directory": "../output",
     "createPackageStructure": true
   },
   "breakpoints": {
@@ -20,5 +20,57 @@
     "lg": "1024px",
     "xl": "1280px",
     "2xl": "1536px"
+  },
+  "grouping": {
+    "enabled": true,
+    "structure": {
+      "Spacing": {
+        "subcategories": ["Padding", "Margin", "Gap", "Space"],
+        "categories": ["padding", "margin", "gap", "space-between"]
+      },
+      "Layout": {
+        "categories": ["display"]
+      },
+      "Sizing": {
+        "subcategories": ["Width", "Height", "MinWidth", "MaxWidth", "MinHeight", "MaxHeight", "Size"],
+        "categories": ["width", "min-width", "max-width", "height", "min-height", "max-height", "size"]
+      },
+      "Background": {
+        "categories": ["background-color"]
+      },
+      "Text": {
+        "categories": ["text-color"]
+      },
+      "Border": {
+        "categories": ["border-width", "border-style", "border-radius", "border-color"]
+      },
+      "Flex": {
+        "subcategories": ["AlignItems", "JustifyContent", "AlignContent", "AlignSelf"],
+        "categories": ["flex-direction", "flex-wrap", "flex-grow-shrink", "flex-basis", "align-items", "justify-content", "align-content", "align-self"]
+      },
+      "Grid": {
+        "categories": ["grid-template-columns", "grid-template-rows", "grid-column", "grid-row", "grid-flow", "grid-auto-columns", "grid-auto-rows"]
+      },
+      "Typography": {
+        "subcategories": ["FontSize", "FontWeight", "FontFamily", "FontStyle", "LineHeight", "TextAlign", "TextTransform", "TextDecoration"],
+        "categories": ["font-size", "font-weight", "font-family", "font-style", "line-height", "text-align", "text-transform", "text-decoration", "text-decoration-color", "text-decoration-style"]
+      },
+      "Effects": {
+        "subcategories": ["Shadow", "Opacity"],
+        "categories": ["box-shadow", "opacity"]
+      },
+      "Position": {
+        "categories": ["position", "z-index"]
+      },
+      "Overflow": {
+        "categories": ["overflow"]
+      },
+      "Transitions": {
+        "categories": ["transition", "duration", "ease", "delay", "animation"]
+      },
+      "Transforms": {
+        "categories": ["scale", "rotate", "translate", "skew"]
+      }
+    }
   }
 }

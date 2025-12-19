@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { loadConfig, GeneratorConfig, Metadata } from './config';
+import { loadConfig, GeneratorConfig, Metadata, GroupingConfig } from './config';
+import { classifyUtility, ClassifiedUtility } from './classifier';
 
 interface CategorizedUtilities {
   [category: string]: string[];
@@ -129,41 +130,49 @@ function generateTWClass(categorized: CategorizedUtilities, config: GeneratorCon
   lines.push(`    public static final String GENERATED_DATE = "${metadata.generatedDate}";`);
   lines.push('');
 
-  // Sort categories for better organization
-  const categoryOrder = [
-    'display', 'position', 'visibility', 'z-index', 'overflow',
-    'flex-direction', 'flex-wrap', 'flex-grow-shrink', 'flex-basis',
-    'align-items', 'align-content', 'align-self',
-    'justify-content', 'justify-items', 'justify-self',
-    'place-content', 'place-items', 'place-self',
-    'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row', 'grid-flow',
-    'grid-auto-columns', 'grid-auto-rows', 'gap',
-    'padding', 'margin', 'space-between',
-    'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'size',
-    'font-family', 'font-size', 'font-weight', 'font-style',
-    'line-height', 'text-align', 'text-color', 'text-decoration', 'text-decoration-color',
-    'text-decoration-style', 'text-transform',
-    'background-color', 'border-radius', 'border-width', 'border-color', 'border-style',
-    'box-shadow', 'opacity',
-    'transition', 'duration', 'ease', 'delay', 'animation',
-    'scale', 'rotate', 'translate', 'skew',
-    'cursor'
-  ];
+  // Check if grouping is enabled
+  if (config.grouping?.enabled) {
+    // Use nested structure
+    const grouped = groupUtilities(categorized, config.grouping);
+    generateNestedStructure(lines, grouped, config);
+  } else {
+    // Use flat structure (current behavior)
+    // Sort categories for better organization
+    const categoryOrder = [
+      'display', 'position', 'visibility', 'z-index', 'overflow',
+      'flex-direction', 'flex-wrap', 'flex-grow-shrink', 'flex-basis',
+      'align-items', 'align-content', 'align-self',
+      'justify-content', 'justify-items', 'justify-self',
+      'place-content', 'place-items', 'place-self',
+      'grid-template-columns', 'grid-template-rows', 'grid-column', 'grid-row', 'grid-flow',
+      'grid-auto-columns', 'grid-auto-rows', 'gap',
+      'padding', 'margin', 'space-between',
+      'width', 'min-width', 'max-width', 'height', 'min-height', 'max-height', 'size',
+      'font-family', 'font-size', 'font-weight', 'font-style',
+      'line-height', 'text-align', 'text-color', 'text-decoration', 'text-decoration-color',
+      'text-decoration-style', 'text-transform',
+      'background-color', 'border-radius', 'border-width', 'border-color', 'border-style',
+      'box-shadow', 'opacity',
+      'transition', 'duration', 'ease', 'delay', 'animation',
+      'scale', 'rotate', 'translate', 'skew',
+      'cursor'
+    ];
 
-  // Generate constants for ordered categories
-  categoryOrder.forEach(category => {
-    if (categorized[category]) {
-      generateCategorySection(lines, category, categorized[category]);
-    }
-  });
-
-  // Generate remaining categories not in the order list
-  Object.keys(categorized)
-    .filter(cat => !categoryOrder.includes(cat))
-    .sort()
-    .forEach(category => {
-      generateCategorySection(lines, category, categorized[category]);
+    // Generate constants for ordered categories
+    categoryOrder.forEach(category => {
+      if (categorized[category]) {
+        generateCategorySection(lines, category, categorized[category]);
+      }
     });
+
+    // Generate remaining categories not in the order list
+    Object.keys(categorized)
+      .filter(cat => !categoryOrder.includes(cat))
+      .sort()
+      .forEach(category => {
+        generateCategorySection(lines, category, categorized[category]);
+      });
+  }
 
   // Add nested classes
   lines.push('');
@@ -280,6 +289,145 @@ function generateCategorySection(lines: string[], category: string, utilities: s
     lines.push(`    public static final String ${constantName} = "${normalizedClassName}";`);
     lines.push('');
   });
+}
+
+/**
+ * Groups utilities into nested structure based on grouping config
+ */
+function groupUtilities(
+  categorized: CategorizedUtilities,
+  groupingConfig: GroupingConfig
+): Map<string, Map<string | undefined, ClassifiedUtility[]>> {
+  const grouped = new Map<string, Map<string | undefined, ClassifiedUtility[]>>();
+
+  for (const [category, utilities] of Object.entries(categorized)) {
+    for (const className of utilities) {
+      const classified = classifyUtility(category, className, groupingConfig);
+
+      if (!grouped.has(classified.topLevel)) {
+        grouped.set(classified.topLevel, new Map());
+      }
+
+      const topLevelMap = grouped.get(classified.topLevel)!;
+      if (!topLevelMap.has(classified.subCategory)) {
+        topLevelMap.set(classified.subCategory, []);
+      }
+
+      topLevelMap.get(classified.subCategory)!.push(classified);
+    }
+  }
+
+  return grouped;
+}
+
+/**
+ * Generates constants within a category
+ */
+function generateConstants(
+  lines: string[],
+  utilities: ClassifiedUtility[],
+  indent: string
+): void {
+  // Sort by constant name for consistent output
+  const sorted = [...utilities].sort((a, b) => {
+    // Sort by numeric value if present, otherwise alphabetically
+    const aMatch = a.constantName.match(/\d+/);
+    const bMatch = b.constantName.match(/\d+/);
+
+    if (aMatch && bMatch) {
+      const aNum = parseInt(aMatch[0]);
+      const bNum = parseInt(bMatch[0]);
+      if (aNum !== bNum) {
+        return aNum - bNum;
+      }
+    }
+
+    return a.constantName.localeCompare(b.constantName);
+  });
+
+  for (const utility of sorted) {
+    const javaDoc = `${indent}/** Tailwind class: {@code ${utility.className}} */`;
+    const constant = `${indent}public static final String ${utility.constantName} = "${utility.className}";`;
+
+    lines.push(javaDoc);
+    lines.push(constant);
+    lines.push('');
+  }
+}
+
+/**
+ * Generates nested class structure
+ */
+function generateNestedStructure(
+  lines: string[],
+  grouped: Map<string, Map<string | undefined, ClassifiedUtility[]>>,
+  config: GeneratorConfig
+): void {
+  // Define category order for consistent output
+  const categoryOrder = [
+    'Spacing', 'Layout', 'Sizing', 'Background', 'Text', 'Border',
+    'Flex', 'Grid', 'Typography', 'Effects', 'Position', 'Overflow',
+    'Transitions', 'Transforms'
+  ];
+
+  // Sort categories by defined order, with unspecified at the end
+  const sortedCategories = [...grouped.keys()].sort((a, b) => {
+    const aIndex = categoryOrder.indexOf(a);
+    const bIndex = categoryOrder.indexOf(b);
+
+    if (aIndex === -1 && bIndex === -1) return a.localeCompare(b);
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  });
+
+  for (const topLevel of sortedCategories) {
+    const subCategories = grouped.get(topLevel)!;
+
+    lines.push('');
+    lines.push(`    // ========== ${topLevel.toUpperCase()} ==========`);
+    lines.push('');
+    lines.push(`    /**`);
+    lines.push(`     * ${topLevel} utilities`);
+    lines.push(`     */`);
+    lines.push(`    public static final class ${topLevel} {`);
+    lines.push('');
+
+    // Check if we have only one subcategory that is undefined (no nesting needed)
+    if (subCategories.size === 1 && subCategories.has(undefined)) {
+      // Direct constants without subcategories
+      const utilities = subCategories.get(undefined)!;
+      generateConstants(lines, utilities, '        ');
+    } else {
+      // Sort subcategories: undefined first, then alphabetically
+      const sortedSubCategories = [...subCategories.entries()].sort((a, b) => {
+        if (a[0] === undefined) return -1;
+        if (b[0] === undefined) return 1;
+        return a[0].localeCompare(b[0]);
+      });
+
+      for (const [subCategory, utilities] of sortedSubCategories) {
+        if (subCategory === undefined) {
+          // Top-level constants in this category (no subcategory)
+          generateConstants(lines, utilities, '        ');
+        } else {
+          // Nested subcategory
+          lines.push(`        /**`);
+          lines.push(`         * ${subCategory} utilities`);
+          lines.push(`         */`);
+          lines.push(`        public static final class ${subCategory} {`);
+          lines.push('');
+          generateConstants(lines, utilities, '            ');
+          lines.push(`            private ${subCategory}() {}`);
+          lines.push('        }');
+          lines.push('');
+        }
+      }
+    }
+
+    lines.push(`        private ${topLevel}() {}`);
+    lines.push('    }');
+  }
 }
 
 /**

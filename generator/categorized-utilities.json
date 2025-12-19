@@ -1,8 +1,8 @@
 {
   "metadata": {
     "tailwindVersion": "4.1.18",
-    "generatedDate": "2025-12-18T15:15:13.578Z",
-    "totalUtilities": 1408
+    "generatedDate": "2025-12-19T07:48:59.561Z",
+    "totalUtilities": 1414
   },
   "utilities": {
     "display": [
@@ -70,6 +70,7 @@
       "inset-x-0",
       "inset-y-0",
       "left-0",
+      "left-4",
       "relative",
       "right-0",
       "static",
@@ -340,7 +341,8 @@
       "gap-x-4",
       "gap-y-0",
       "gap-y-1",
-      "gap-y-2"
+      "gap-y-2",
+      "gap-y-4"
     ],
     "padding": [
       "p-0",
@@ -387,6 +389,7 @@
       "pl-0",
       "pl-1",
       "pl-2",
+      "pl-4",
       "pr-0",
       "pr-1",
       "pr-2",
@@ -415,6 +418,7 @@
       "-m-4",
       "-mb-1",
       "-ml-1",
+      "-ml-4",
       "-mr-1",
       "-mt-1",
       "-mx-1",
@@ -461,6 +465,7 @@
       "ml-0",
       "ml-1",
       "ml-2",
+      "ml-4",
       "mr-0",
       "mr-1",
       "mr-2",
@@ -487,6 +492,7 @@
       "space-y-0",
       "space-y-1",
       "space-y-2",
+      "space-y-4",
       "space-y-reverse"
     ],
     "width": [

@@ -29,36 +29,38 @@ npm run all  # Extracts utilities and generates Java code
 
 ### Use in Your Project
 
-```java
-import static com.vaadin.flow.component.tailwind.TW.*;
+The generator creates a nested structure similar to Vaadin's `LumoUtility` for better organization:
 
-// Basic usage
+```java
+import com.vaadin.flow.component.tailwind.TW;
+
+// Basic usage with nested structure
 Div card = new Div();
 card.addClassNames(
-    BG_WHITE,
-    ROUNDED_LG,
-    SHADOW_LG,
-    P_6,
-    MAX_W_SM
+    TW.Background.WHITE,
+    TW.Border.ROUNDED_LG,
+    TW.Effects.Shadow.LG,
+    TW.Spacing.Padding.P_6,
+    TW.Sizing.MaxWidth.W_SM
 );
 
 // Responsive design
 card.addClassNames(
-    FLEX_COL,                    // Mobile-first: column layout
-    Responsive.md(FLEX_ROW),     // md and up: row layout
-    Responsive.lg(GAP_8)         // lg and up: 2rem gap
+    TW.Flex.FLEX_COL,                      // Mobile-first: column layout
+    TW.Responsive.md(TW.Flex.FLEX_ROW),    // md and up: row layout
+    TW.Responsive.lg(TW.Spacing.Gap.GAP_8) // lg and up: 2rem gap
 );
 
 // State variants
 Button button = new Button("Click me");
 button.addClassNames(
-    BG_BLUE_500,
-    TEXT_WHITE,
-    PX_4,
-    PY_2,
-    ROUNDED,
-    State.hover(BG_BLUE_600),
-    State.focus(RING_2)
+    TW.Background.BLUE_500,
+    TW.Text.WHITE,
+    TW.Spacing.Padding.X_4,
+    TW.Spacing.Padding.Y_2,
+    TW.Border.ROUNDED,
+    TW.State.hover(TW.Background.BLUE_600),
+    TW.State.focus(TW.Border.RING_2)
 );
 ```
 
@@ -160,99 +162,178 @@ npm run generate -- \
   --output ../my-project/src
 ```
 
+## Nested Structure
+
+The generator organizes Tailwind CSS utilities into a hierarchical structure similar to Vaadin's `LumoUtility`, making it easier to discover and use related utilities through IDE autocomplete.
+
+### Top-Level Categories
+
+- **TW.Spacing** - Padding, Margin, Gap, Space utilities
+- **TW.Layout** - Display utilities (flex, grid, block, etc.)
+- **TW.Sizing** - Width, Height, Min/Max Width/Height
+- **TW.Background** - Background colors
+- **TW.Text** - Text colors
+- **TW.Border** - Border width, style, radius, and colors
+- **TW.Flex** - Flexbox utilities (AlignItems, JustifyContent, etc.)
+- **TW.Grid** - Grid layout utilities
+- **TW.Typography** - FontSize, FontWeight, TextAlign, etc.
+- **TW.Effects** - Shadow, Opacity
+- **TW.Position** - Position types and inset values
+- **TW.Overflow** - Overflow utilities
+- **TW.Transitions** - Transition, duration, ease, delay, animation
+- **TW.Transforms** - Scale, rotate, translate, skew
+- **TW.Other** - Miscellaneous utilities
+
+### Constant Naming Convention
+
+Constants follow these patterns for better organization:
+
+```java
+// Spacing with direction prefixes
+TW.Spacing.Padding.LEFT_4      // pl-4
+TW.Spacing.Padding.RIGHT_8     // pr-8
+TW.Spacing.Padding.X_4         // px-4 (horizontal)
+TW.Spacing.Padding.Y_4         // py-4 (vertical)
+TW.Spacing.Padding.P_4         // p-4 (all sides)
+
+// Margins including negative values
+TW.Spacing.Margin.LEFT_4       // ml-4
+TW.Spacing.Margin.NEG_LEFT_4   // -ml-4
+
+// Colors without prefix
+TW.Background.BLUE_500         // bg-blue-500
+TW.Text.GRAY_900               // text-gray-900
+TW.Border.RED_300              // border-red-300
+
+// Sizing with semantic names
+TW.Sizing.Width.W_FULL         // w-full
+TW.Sizing.Width.W_1_2          // w-1/2
+TW.Sizing.Height.H_SCREEN      // h-screen
+```
+
+### Configuring Grouping
+
+The nested structure is controlled by `generator.config.json`:
+
+```json
+{
+  "grouping": {
+    "enabled": true,
+    "structure": {
+      "Spacing": {
+        "subcategories": ["Padding", "Margin", "Gap", "Space"],
+        "categories": ["padding", "margin", "gap", "space-between"]
+      },
+      ...
+    }
+  }
+}
+```
+
+Set `"enabled": false` to generate a flat structure instead of nested classes.
+
 ## Usage Examples
 
 ### Layout with Flexbox
 
 ```java
+import com.vaadin.flow.component.tailwind.TW;
+
 Div container = new Div();
 container.addClassNames(
-    FLEX,
-    FLEX_COL,
-    ITEMS_CENTER,
-    JUSTIFY_CENTER,
-    GAP_4,
-    P_8
+    TW.Layout.FLEX,
+    TW.Flex.FLEX_COL,
+    TW.Flex.AlignItems.CENTER,
+    TW.Flex.JustifyContent.CENTER,
+    TW.Spacing.Gap.GAP_4,
+    TW.Spacing.Padding.P_8
 );
 ```
 
 ### Responsive Grid
 
 ```java
+import com.vaadin.flow.component.tailwind.TW;
+
 Div grid = new Div();
 grid.addClassNames(
-    GRID,
-    GRID_COLS_1,                 // 1 column on mobile
-    Responsive.md(GRID_COLS_2),  // 2 columns on tablet
-    Responsive.lg(GRID_COLS_3),  // 3 columns on desktop
-    GAP_6
+    TW.Layout.GRID,
+    TW.Grid.COLS_1,                           // 1 column on mobile
+    TW.Responsive.md(TW.Grid.COLS_2),         // 2 columns on tablet
+    TW.Responsive.lg(TW.Grid.COLS_3),         // 3 columns on desktop
+    TW.Spacing.Gap.GAP_6
 );
 ```
 
 ### Interactive Button
 
 ```java
+import com.vaadin.flow.component.tailwind.TW;
+
 Button button = new Button("Submit");
 button.addClassNames(
-    BG_BLUE_500,
-    TEXT_WHITE,
-    FONT_BOLD,
-    PY_2,
-    PX_4,
-    ROUNDED,
-    State.hover(BG_BLUE_600),
-    State.focus(OUTLINE_NONE),
-    State.focus(RING_2),
-    State.disabled(OPACITY_50)
+    TW.Background.BLUE_500,
+    TW.Text.WHITE,
+    TW.Typography.FontWeight.BOLD,
+    TW.Spacing.Padding.Y_2,
+    TW.Spacing.Padding.X_4,
+    TW.Border.ROUNDED,
+    TW.State.hover(TW.Background.BLUE_600),
+    TW.State.focus(TW.Border.RING_2),
+    TW.State.disabled(TW.Effects.Opacity.OPACITY_50)
 );
 ```
 
 ### Dark Mode Support
 
 ```java
+import com.vaadin.flow.component.tailwind.TW;
+
 Div card = new Div();
 card.addClassNames(
-    BG_WHITE,
-    TEXT_GRAY_900,
-    State.dark(BG_GRAY_800),
-    State.dark(TEXT_GRAY_100),
-    ROUNDED_LG,
-    P_6
+    TW.Background.WHITE,
+    TW.Text.GRAY_900,
+    TW.State.dark(TW.Background.GRAY_800),
+    TW.State.dark(TW.Text.GRAY_100),
+    TW.Border.ROUNDED_LG,
+    TW.Spacing.Padding.P_6
 );
 ```
 
 ### Complex Component
 
 ```java
+import com.vaadin.flow.component.tailwind.TW;
+
 public class CardComponent extends Div {
     public CardComponent(String title, String content) {
         // Container styling
         addClassNames(
-            BG_WHITE,
-            ROUNDED_XL,
-            SHADOW_LG,
-            P_6,
-            MAX_W_SM,
-            State.hover(SHADOW_XL),
-            Responsive.md(MAX_W_MD),
-            State.dark(BG_GRAY_800)
+            TW.Background.WHITE,
+            TW.Border.ROUNDED_XL,
+            TW.Effects.Shadow.LG,
+            TW.Spacing.Padding.P_6,
+            TW.Sizing.MaxWidth.W_SM,
+            TW.State.hover(TW.Effects.Shadow.XL),
+            TW.Responsive.md(TW.Sizing.MaxWidth.W_MD),
+            TW.State.dark(TW.Background.GRAY_800)
         );
 
         // Heading
         H2 heading = new H2(title);
         heading.addClassNames(
-            TEXT_2XL,
-            FONT_BOLD,
-            MB_4,
-            TEXT_GRAY_900,
-            State.dark(TEXT_WHITE)
+            TW.Typography.FontSize.XXLARGE,
+            TW.Typography.FontWeight.BOLD,
+            TW.Spacing.Margin.BOTTOM_4,
+            TW.Text.GRAY_900,
+            TW.State.dark(TW.Text.WHITE)
         );
 
         // Content
         Paragraph text = new Paragraph(content);
         text.addClassNames(
-            TEXT_GRAY_700,
-            State.dark(TEXT_GRAY_300)
+            TW.Text.GRAY_700,
+            TW.State.dark(TW.Text.GRAY_300)
         );
 
         add(heading, text);
@@ -262,18 +343,44 @@ public class CardComponent extends Div {
 
 ## API Reference
 
-### Constants
+### Nested Constants
 
-All standard Tailwind utility classes are available as constants:
+All Tailwind utility classes are organized in a nested structure:
 
 ```java
-TW.FLEX              // "flex"
-TW.ITEMS_CENTER      // "items-center"
-TW.P_4               // "p-4"
-TW.P_0_5             // "p-0.5"  (decimal values)
-TW.NEG_M_4           // "-m-4"   (negative values)
-TW.W_1_2             // "w-1/2"  (fractional values)
-TW.BG_BLUE_500       // "bg-blue-500"
+// Layout
+TW.Layout.FLEX                    // "flex"
+TW.Layout.GRID                    // "grid"
+TW.Layout.BLOCK                   // "block"
+
+// Flexbox
+TW.Flex.FLEX_COL                  // "flex-col"
+TW.Flex.AlignItems.CENTER         // "items-center"
+TW.Flex.JustifyContent.BETWEEN    // "justify-between"
+
+// Spacing
+TW.Spacing.Padding.P_4            // "p-4"
+TW.Spacing.Padding.P_0_5          // "p-0.5"  (decimal values)
+TW.Spacing.Padding.LEFT_4         // "pl-4"  (direction prefix)
+TW.Spacing.Padding.X_4            // "px-4"  (axis shortcut)
+TW.Spacing.Margin.NEG_M_4         // "-m-4"  (negative values)
+
+// Sizing
+TW.Sizing.Width.W_1_2             // "w-1/2"  (fractional values)
+TW.Sizing.Width.W_FULL            // "w-full"
+
+// Colors
+TW.Background.BLUE_500            // "bg-blue-500"
+TW.Text.GRAY_900                  // "text-gray-900"
+TW.Border.RED_300                 // "border-red-300"
+
+// Effects
+TW.Effects.Shadow.LG              // "shadow-lg"
+TW.Effects.Opacity.OPACITY_50     // "opacity-50"
+
+// Typography
+TW.Typography.FontSize.XL         // "text-xl"
+TW.Typography.FontWeight.BOLD     // "font-bold"
 ```
 
 ### Responsive Modifiers
