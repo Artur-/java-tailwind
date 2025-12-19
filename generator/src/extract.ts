@@ -63,12 +63,13 @@ function extractUtilityClasses(cssContent: string): Set<string> {
             visit: 'ClassSelector',
             enter(classNode) {
               if (classNode.name) {
-                const className = classNode.name;
+                // Normalize class name by removing escape characters
+                const className = classNode.name.replace(/\\/g, '');
 
                 // Filter out non-utility classes
                 if (!className.startsWith('group') &&
                     !className.startsWith('peer') &&
-                    !className.includes('\\:')) {  // Skip escaped modifiers in CSS
+                    !className.includes(':')) {  // Skip modifiers (hover:, focus:, etc.)
                   utilities.add(className);
                 }
               }

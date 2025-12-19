@@ -9,12 +9,8 @@ export interface ClassifiedUtility {
 
 /**
  * Converts a Tailwind class name to a Java constant name
- * (from generate.ts - reused here)
  */
 function toConstantName(className: string): string {
-  // Remove backslash escapes
-  className = className.replace(/\\/g, '');
-
   // Handle negative values
   const isNegative = className.startsWith('-');
   if (isNegative) {
@@ -72,23 +68,20 @@ export function classifyUtility(
   className: string,
   groupingConfig: GroupingConfig
 ): ClassifiedUtility {
-  // Normalize className (remove escape characters)
-  const normalizedClassName = className.replace(/\\/g, '');
-
   // Find which top-level group this category belongs to
   for (const [topLevel, config] of Object.entries(groupingConfig.structure)) {
     if (config.categories.includes(category)) {
       // Determine subcategory if applicable
-      const subCategory = determineSubcategory(category, normalizedClassName, config);
+      const subCategory = determineSubcategory(category, className, config);
 
       // Generate constant name with proper prefix
-      const constantName = generateConstantName(normalizedClassName, category, subCategory);
+      const constantName = generateConstantName(className, category, subCategory);
 
       return {
         topLevel,
         subCategory,
         constantName,
-        className: normalizedClassName
+        className
       };
     }
   }
@@ -96,8 +89,8 @@ export function classifyUtility(
   // Default to Other category
   return {
     topLevel: "Other",
-    constantName: toConstantName(normalizedClassName),
-    className: normalizedClassName
+    constantName: toConstantName(className),
+    className
   };
 }
 
@@ -159,23 +152,21 @@ function generateConstantName(
   category: string,
   subCategory?: string
 ): string {
-  const normalized = className.replace(/\\/g, '');
-
   // For padding: pl-4 -> LEFT_4, px-4 -> X_4, p-4 -> P_4
   if (category === 'padding') {
-    if (normalized.startsWith('pl-')) return 'LEFT_' + extractValue(normalized);
-    if (normalized.startsWith('pr-')) return 'RIGHT_' + extractValue(normalized);
-    if (normalized.startsWith('pt-')) return 'TOP_' + extractValue(normalized);
-    if (normalized.startsWith('pb-')) return 'BOTTOM_' + extractValue(normalized);
-    if (normalized.startsWith('px-')) return 'X_' + extractValue(normalized);
-    if (normalized.startsWith('py-')) return 'Y_' + extractValue(normalized);
-    if (normalized.startsWith('p-')) return 'P_' + extractValue(normalized);
+    if (className.startsWith('pl-')) return 'LEFT_' + extractValue(className);
+    if (className.startsWith('pr-')) return 'RIGHT_' + extractValue(className);
+    if (className.startsWith('pt-')) return 'TOP_' + extractValue(className);
+    if (className.startsWith('pb-')) return 'BOTTOM_' + extractValue(className);
+    if (className.startsWith('px-')) return 'X_' + extractValue(className);
+    if (className.startsWith('py-')) return 'Y_' + extractValue(className);
+    if (className.startsWith('p-')) return 'P_' + extractValue(className);
   }
 
   // For margin: ml-4 -> LEFT_4, -ml-4 -> NEG_LEFT_4, mx-4 -> X_4, m-4 -> M_4
   if (category === 'margin') {
-    const isNegative = normalized.startsWith('-');
-    const withoutNeg = isNegative ? normalized.substring(1) : normalized;
+    const isNegative = className.startsWith('-');
+    const withoutNeg = isNegative ? className.substring(1) : className;
 
     let constantName = '';
     if (withoutNeg.startsWith('ml-')) constantName = 'LEFT_' + extractValue(withoutNeg);
@@ -192,15 +183,15 @@ function generateConstantName(
 
   // For gap: gap-x-4 -> X_4, gap-y-4 -> Y_4, gap-4 -> GAP_4
   if (category === 'gap') {
-    if (normalized.startsWith('gap-x-')) return 'X_' + extractValue(normalized);
-    if (normalized.startsWith('gap-y-')) return 'Y_' + extractValue(normalized);
-    if (normalized.startsWith('gap-')) return 'GAP_' + extractValue(normalized);
+    if (className.startsWith('gap-x-')) return 'X_' + extractValue(className);
+    if (className.startsWith('gap-y-')) return 'Y_' + extractValue(className);
+    if (className.startsWith('gap-')) return 'GAP_' + extractValue(className);
   }
 
   // For space-between: space-x-4 -> X_4, space-y-4 -> Y_4
   if (category === 'space-between') {
-    if (normalized.startsWith('space-x-')) return 'X_' + extractValue(normalized);
-    if (normalized.startsWith('space-y-')) return 'Y_' + extractValue(normalized);
+    if (className.startsWith('space-x-')) return 'X_' + extractValue(className);
+    if (className.startsWith('space-y-')) return 'Y_' + extractValue(className);
   }
 
   // For width: w-full -> FULL, w-1/2 -> 1_2, w-64 -> W_64
@@ -208,8 +199,8 @@ function generateConstantName(
     const prefix = category === 'width' ? 'w-' :
                    category === 'min-width' ? 'min-w-' : 'max-w-';
 
-    if (normalized.startsWith(prefix)) {
-      const value = normalized.substring(prefix.length);
+    if (className.startsWith(prefix)) {
+      const value = className.substring(prefix.length);
       // For special values like "full", "screen", "auto", don't add prefix
       if (['full', 'screen', 'auto', 'min', 'max', 'fit'].includes(value) ||
           value.startsWith('screen-')) {
@@ -225,8 +216,8 @@ function generateConstantName(
     const prefix = category === 'height' ? 'h-' :
                    category === 'min-height' ? 'min-h-' : 'max-h-';
 
-    if (normalized.startsWith(prefix)) {
-      const value = normalized.substring(prefix.length);
+    if (className.startsWith(prefix)) {
+      const value = className.substring(prefix.length);
       // For special values like "full", "screen", "auto", don't add prefix
       if (['full', 'screen', 'auto', 'min', 'max', 'fit'].includes(value) ||
           value.startsWith('screen-')) {
@@ -239,39 +230,39 @@ function generateConstantName(
 
   // For size: size-4 -> SIZE_4
   if (category === 'size') {
-    if (normalized.startsWith('size-')) {
-      return 'SIZE_' + extractValue(normalized);
+    if (className.startsWith('size-')) {
+      return 'SIZE_' + extractValue(className);
     }
   }
 
   // For background colors: bg-blue-500 -> BLUE_500, bg-white -> WHITE
   if (category === 'background-color') {
-    return normalized.replace('bg-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('bg-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For text colors: text-gray-900 -> GRAY_900, text-white -> WHITE
   if (category === 'text-color') {
-    return normalized.replace('text-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('text-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For border colors: border-blue-500 -> BLUE_500
   if (category === 'border-color') {
-    return normalized.replace('border-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('border-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For border radius: rounded-lg -> ROUNDED_LG, rounded -> ROUNDED
   if (category === 'border-radius') {
-    return normalized.replace(/-/g, '_').toUpperCase();
+    return className.replace(/-/g, '_').toUpperCase();
   }
 
   // For border width: border-2 -> BORDER_2, border -> BORDER
   if (category === 'border-width') {
-    return normalized.replace(/-/g, '_').toUpperCase();
+    return className.replace(/-/g, '_').toUpperCase();
   }
 
   // For border style: border-dashed -> DASHED, border-solid -> SOLID
   if (category === 'border-style') {
-    return normalized.replace('border-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('border-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For font-size: text-xl -> XL, text-2xl -> XXLARGE (map to friendly names)
@@ -291,63 +282,63 @@ function generateConstantName(
       'text-8xl': 'XXXXXXXXLARGE',
       'text-9xl': 'XXXXXXXXXLARGE'
     };
-    return sizeMap[normalized] || toConstantName(normalized);
+    return sizeMap[className] || toConstantName(className);
   }
 
   // For font-weight: font-bold -> BOLD, font-semibold -> SEMIBOLD
   if (category === 'font-weight') {
-    return normalized.replace('font-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('font-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For font-family: font-sans -> SANS, font-serif -> SERIF
   if (category === 'font-family') {
-    return normalized.replace('font-', '').toUpperCase();
+    return className.replace('font-', '').toUpperCase();
   }
 
   // For text-align: text-left -> LEFT, text-center -> CENTER
   if (category === 'text-align') {
-    return normalized.replace('text-', '').toUpperCase();
+    return className.replace('text-', '').toUpperCase();
   }
 
   // For display: flex -> FLEX, grid -> GRID, block -> BLOCK
   if (category === 'display') {
-    return normalized.replace(/-/g, '_').toUpperCase();
+    return className.replace(/-/g, '_').toUpperCase();
   }
 
   // For flex items: items-center -> CENTER, items-start -> START
   if (category === 'align-items') {
-    return normalized.replace('items-', '').toUpperCase();
+    return className.replace('items-', '').toUpperCase();
   }
 
   // For justify-content: justify-center -> CENTER, justify-between -> BETWEEN
   if (category === 'justify-content') {
-    return normalized.replace('justify-', '').toUpperCase();
+    return className.replace('justify-', '').toUpperCase();
   }
 
   // For align-content: content-center -> CENTER, content-between -> BETWEEN
   if (category === 'align-content') {
-    return normalized.replace('content-', '').toUpperCase();
+    return className.replace('content-', '').toUpperCase();
   }
 
   // For align-self: self-center -> CENTER, self-start -> START
   if (category === 'align-self') {
-    return normalized.replace('self-', '').toUpperCase();
+    return className.replace('self-', '').toUpperCase();
   }
 
   // For flex direction: flex-row -> ROW, flex-col -> COL
   if (category === 'flex-direction') {
-    return normalized.replace('flex-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('flex-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For flex wrap: flex-wrap -> WRAP, flex-nowrap -> NOWRAP
   if (category === 'flex-wrap') {
-    return normalized.replace('flex-', '').replace(/-/g, '_').toUpperCase();
+    return className.replace('flex-', '').replace(/-/g, '_').toUpperCase();
   }
 
   // For box-shadow: shadow-lg -> LG, shadow-sm -> SM, shadow -> DEFAULT
   if (category === 'box-shadow') {
-    if (normalized === 'shadow') return 'DEFAULT';
-    let constantName = normalized.replace('shadow-', '').replace(/-/g, '_').toUpperCase();
+    if (className === 'shadow') return 'DEFAULT';
+    let constantName = className.replace('shadow-', '').replace(/-/g, '_').toUpperCase();
     // Handle constant names starting with digits (invalid in Java)
     if (/^\d/.test(constantName)) {
       constantName = 'N' + constantName;
@@ -357,30 +348,30 @@ function generateConstantName(
 
   // For opacity: opacity-50 -> OPACITY_50
   if (category === 'opacity') {
-    return normalized.replace(/-/g, '_').toUpperCase();
+    return className.replace(/-/g, '_').toUpperCase();
   }
 
   // For position: absolute -> ABSOLUTE, relative -> RELATIVE
   if (category === 'position') {
     // Position values like "top-0", "left-4", etc.
-    if (normalized.match(/^(top|right|bottom|left|inset)-/)) {
-      return normalized.replace(/-/g, '_').replace(/\./g, '_').toUpperCase();
+    if (className.match(/^(top|right|bottom|left|inset)-/)) {
+      return className.replace(/-/g, '_').replace(/\./g, '_').toUpperCase();
     }
     // Position types: absolute, relative, etc.
-    return normalized.toUpperCase();
+    return className.toUpperCase();
   }
 
   // For z-index: z-10 -> Z_10, z-auto -> AUTO
   if (category === 'z-index') {
-    if (normalized === 'z-auto') return 'AUTO';
-    return normalized.replace(/-/g, '_').toUpperCase();
+    if (className === 'z-auto') return 'AUTO';
+    return className.replace(/-/g, '_').toUpperCase();
   }
 
   // For grid: grid-cols-2 -> COLS_2, col-span-2 -> SPAN_2
   if (category.startsWith('grid-')) {
-    return normalized.replace(/^grid-/, '').replace(/-/g, '_').toUpperCase();
+    return className.replace(/^grid-/, '').replace(/-/g, '_').toUpperCase();
   }
 
   // Default: convert entire class name using toConstantName
-  return toConstantName(normalized);
+  return toConstantName(className);
 }
