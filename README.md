@@ -46,8 +46,8 @@ card.addClassNames(
 
 // Responsive design
 card.addClassNames(
-    TW.Flex.FLEX_COL,                      // Mobile-first: column layout
-    TW.Responsive.md(TW.Flex.FLEX_ROW),    // md and up: row layout
+    TW.Flex.COL,                           // Mobile-first: column layout
+    TW.Responsive.md(TW.Flex.ROW),         // md and up: row layout
     TW.Responsive.lg(TW.Spacing.Gap.GAP_8) // lg and up: 2rem gap
 );
 
@@ -60,7 +60,7 @@ button.addClassNames(
     TW.Spacing.Padding.Y_2,
     TW.Border.ROUNDED,
     TW.State.hover(TW.Background.BLUE_600),
-    TW.State.focus(TW.Border.RING_2)
+    TW.State.focus(TW.Other.RING_2)
 );
 ```
 
@@ -82,8 +82,7 @@ Edit `generator/generator.config.json` to customize generation:
   },
   "java": {
     "package": "com.vaadin.flow.component.tailwind",
-    "className": "TW",
-    "sinceVersion": "25.1"
+    "className": "TW"
   },
   "output": {
     "directory": "../../output",
@@ -108,7 +107,6 @@ cd generator
 npm run generate -- \
   --package com.example.tailwind \
   --version 4.2.0 \
-  --since 2.0 \
   --output ./custom-output \
   --class-name TailwindClasses
 ```
@@ -117,7 +115,6 @@ Available arguments:
 - `--config <path>` - Path to config file (default: `generator.config.json`)
 - `--package <name>` - Java package name
 - `--version <version>` - Tailwind CSS version or "auto"
-- `--since <version>` - Version for `@since` JavaDoc tag
 - `--output <path>` - Output directory path
 - `--class-name <name>` - Java class name (default: `TW`)
 
@@ -140,7 +137,7 @@ The generator reads the version from `dependencies.tailwindcss` or `devDependenc
 
 **Generate for different package:**
 ```bash
-npm run generate -- --package com.myapp.styles --since 1.0
+npm run generate -- --package com.myapp.styles
 ```
 
 **Use specific Tailwind version:**
@@ -158,7 +155,6 @@ npm run generate -- --output ./src/main/java --package com.example.ui
 npm run generate -- \
   --package org.acme.tailwind \
   --class-name Tailwind \
-  --since 3.0 \
   --output ../my-project/src
 ```
 
@@ -279,7 +275,7 @@ button.addClassNames(
     TW.Spacing.Padding.X_4,
     TW.Border.ROUNDED,
     TW.State.hover(TW.Background.BLUE_600),
-    TW.State.focus(TW.Border.RING_2),
+    TW.State.focus(TW.Other.RING_2),
     TW.State.disabled(TW.Effects.Opacity.OPACITY_50)
 );
 ```
@@ -397,7 +393,7 @@ TW.Responsive.xxl(String utility)  // 1536px+  (for "2xl:")
 
 **Example:**
 ```java
-div.addClassName(TW.Responsive.md(TW.FLEX));  // "md:flex"
+div.addClassName(TW.Responsive.md(TW.Layout.FLEX));  // "md:flex"
 ```
 
 ### State Variants
@@ -414,7 +410,7 @@ TW.State.disabled(String utility) // disabled:
 
 **Example:**
 ```java
-button.addClassName(TW.State.hover(TW.BG_BLUE_600));  // "hover:bg-blue-600"
+button.addClassName(TW.State.hover(TW.Background.BLUE_600));  // "hover:bg-blue-600"
 ```
 
 ## Project Structure
@@ -557,11 +553,15 @@ div.addClassNames("flex", "items-center", "p-4", "bg-gray-100");
 ### After (Type-Safe Constants)
 
 ```java
-import static com.vaadin.flow.component.tailwind.TW.*;
+import com.vaadin.flow.component.tailwind.TW;
 
-div.addClassNames(FLEX, ITEMS_CENTER, P_4, BG_GRAY_100);
-//                ^^^^  ^^^^^^^^^^^^^  ^^^  ^^^^^^^^^^^
-//                ✅ Autocomplete  ✅ Compile-time validation  ✅ Refactoring support
+div.addClassNames(
+    TW.Layout.FLEX,
+    TW.Flex.AlignItems.CENTER,
+    TW.Spacing.Padding.P_4,
+    TW.Background.GRAY_100
+);
+//  ✅ Autocomplete  ✅ Compile-time validation  ✅ Refactoring support
 ```
 
 ## Limitations
