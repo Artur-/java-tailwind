@@ -11,13 +11,13 @@ import java.io.Serializable;
  * <h2>Usage Example</h2>
  * <pre>{@code
  * Div container = new Div();
- * container.addClassNames(TW.FLEX, TW.ITEMS_CENTER, TW.P_4, TW.BG_GRAY_100);
+ * container.addClassNames(TW.Layout.FLEX, TW.Flex.AlignItems.CENTER, TW.Spacing.Padding.P_4, TW.Background.GRAY_100);
  *
  * // With responsive modifiers
  * container.addClassNames(
- *     TW.FLEX,
- *     TW.Responsive.sm(TW.FLEX_COL),
- *     TW.Responsive.md(TW.FLEX_ROW)
+ *     TW.Layout.FLEX,
+ *     TW.Responsive.sm(TW.Flex.COL),
+ *     TW.Responsive.md(TW.Flex.ROW)
  * );
  * }</pre>
  *

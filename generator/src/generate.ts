@@ -104,14 +104,25 @@ function generateTWClass(categorized: CategorizedUtilities, config: GeneratorCon
   lines.push(' * <h2>Usage Example</h2>');
   lines.push(' * <pre>{@code');
   lines.push(' * Div container = new Div();');
-  lines.push(` * container.addClassNames(${config.java.className}.FLEX, ${config.java.className}.ITEMS_CENTER, ${config.java.className}.P_4, ${config.java.className}.BG_GRAY_100);`);
-  lines.push(' *');
-  lines.push(' * // With responsive modifiers');
-  lines.push(' * container.addClassNames(');
-  lines.push(` *     ${config.java.className}.FLEX,`);
-  lines.push(` *     ${config.java.className}.Responsive.sm(${config.java.className}.FLEX_COL),`);
-  lines.push(` *     ${config.java.className}.Responsive.md(${config.java.className}.FLEX_ROW)`);
-  lines.push(' * );');
+  if (config.grouping?.enabled) {
+    lines.push(` * container.addClassNames(${config.java.className}.Layout.FLEX, ${config.java.className}.Flex.AlignItems.CENTER, ${config.java.className}.Spacing.Padding.P_4, ${config.java.className}.Background.GRAY_100);`);
+    lines.push(' *');
+    lines.push(' * // With responsive modifiers');
+    lines.push(' * container.addClassNames(');
+    lines.push(` *     ${config.java.className}.Layout.FLEX,`);
+    lines.push(` *     ${config.java.className}.Responsive.sm(${config.java.className}.Flex.COL),`);
+    lines.push(` *     ${config.java.className}.Responsive.md(${config.java.className}.Flex.ROW)`);
+    lines.push(' * );');
+  } else {
+    lines.push(` * container.addClassNames(${config.java.className}.FLEX, ${config.java.className}.ITEMS_CENTER, ${config.java.className}.P_4, ${config.java.className}.BG_GRAY_100);`);
+    lines.push(' *');
+    lines.push(' * // With responsive modifiers');
+    lines.push(' * container.addClassNames(');
+    lines.push(` *     ${config.java.className}.FLEX,`);
+    lines.push(` *     ${config.java.className}.Responsive.sm(${config.java.className}.FLEX_COL),`);
+    lines.push(` *     ${config.java.className}.Responsive.md(${config.java.className}.FLEX_ROW)`);
+    lines.push(' * );');
+  }
   lines.push(' * }</pre>');
   lines.push(' *');
   lines.push(' * @see <a href="https://tailwindcss.com/docs">Tailwind CSS Documentation</a>');
